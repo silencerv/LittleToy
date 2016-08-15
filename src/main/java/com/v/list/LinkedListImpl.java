@@ -3,32 +3,22 @@ package com.v.list;
 import java.util.*;
 
 /**
- * Created by v on 2016/8/13.
+ * Created by v on 2016/8/15.
  */
-public class ArrayListImpl<E> implements List<E> {
-
-
-    private Object [] membersArray;
-
-    private int capacity;
+public class LinkedListImpl<E> implements List<E> {
 
     private int size;
 
-    private double expansionCoe = 2;
+    private Node<E> headNode;
 
-    public ArrayListImpl(){
-        this(10);
+    private Node<E> tailNode;
+
+    public LinkedListImpl() {
+        headNode = new Node();
+        tailNode = new Node();
+        headNode.nextNode = tailNode;
+        tailNode.preNode = headNode;
     }
-
-    public ArrayListImpl(int capacity){
-        if(capacity < 1)
-            throw new RuntimeException("invalid capacity");
-        membersArray = new Object[capacity];
-        size = 0;
-        this.capacity = capacity;
-    }
-
-
 
     /**
      * Returns the number of elements in this list.  If this list contains
@@ -49,7 +39,7 @@ public class ArrayListImpl<E> implements List<E> {
      */
     @Override
     public boolean isEmpty() {
-        return size < 1 ;
+        return size == 0;
     }
 
     /**
@@ -69,11 +59,15 @@ public class ArrayListImpl<E> implements List<E> {
      */
     @Override
     public boolean contains(Object o) {
-       if (isEmpty())
-           return false;
-        for (int i = 0 ; i < size ; i++){
-            if (o.equals(membersArray[i]))
+        Node rightNode = headNode.nextNode;
+        boolean isNull = o == null;
+        while (rightNode != null && rightNode.nextNode != null){
+            if (isNull)
+                if (rightNode.data == null)
+                    return true;
+            if (o.equals(rightNode.data))
                 return true;
+            rightNode = rightNode.nextNode;
         }
         return false;
     }
@@ -84,7 +78,7 @@ public class ArrayListImpl<E> implements List<E> {
      * @return an iterator over the elements in this list in proper sequence
      */
     @Override
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         return listIterator();
     }
 
@@ -106,570 +100,14 @@ public class ArrayListImpl<E> implements List<E> {
      */
     @Override
     public Object[] toArray() {
-        Object [] copyArr = new Object[(int)(size * expansionCoe)];
-        System.arraycopy(membersArray,0,copyArr,0,size);
-        return copyArr;
-    }
-
-    /**
-     * Appends the specified element to the end of this list (optional
-     * operation).
-     * <p/>
-     * <p>Lists that support this operation may place limitations on what
-     * elements may be added to this list.  In particular, some
-     * lists will refuse to add null elements, and others will impose
-     * restrictions on the type of elements that may be added.  List
-     * classes should clearly specify in their documentation any restrictions
-     * on what elements may be added.
-     *
-     * @param o element to be appended to this list
-     * @return <tt>true</tt> (as specified by {@link Collection#add})
-     * @throws UnsupportedOperationException if the <tt>add</tt> operation
-     *                                       is not supported by this list
-     * @throws ClassCastException            if the class of the specified element
-     *                                       prevents it from being added to this list
-     * @throws NullPointerException          if the specified element is null and this
-     *                                       list does not permit null elements
-     * @throws IllegalArgumentException      if some property of this element
-     *                                       prevents it from being added to this list
-     */
-    @Override
-    public boolean add(Object o) {
-        if((size + 1)> capacity){
-            capacity = (int)(capacity * expansionCoe);
-            Object [] copyArr = new Object[capacity];
-            System.arraycopy(membersArray,0,copyArr,0,size);
-            membersArray = copyArr;
-        }
-        membersArray[size++] = o;
-        return true;
-    }
-
-    /**
-     * Removes the first occurrence of the specified element from this list,
-     * if it is present (optional operation).  If this list does not contain
-     * the element, it is unchanged.  More formally, removes the element with
-     * the lowest index <tt>i</tt> such that
-     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>
-     * (if such an element exists).  Returns <tt>true</tt> if this list
-     * contained the specified element (or equivalently, if this list changed
-     * as a result of the call).
-     *
-     * @param o element to be removed from this list, if present
-     * @return <tt>true</tt> if this list contained the specified element
-     * @throws ClassCastException            if the type of the specified element
-     *                                       is incompatible with this list
-     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws NullPointerException          if the specified element is null and this
-     *                                       list does not permit null elements
-     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws UnsupportedOperationException if the <tt>remove</tt> operation
-     *                                       is not supported by this list
-     */
-    @Override
-    public boolean remove(Object o) {
-        if (isEmpty())
-            return true;
-        boolean isNull = o == null;
-        int targetIndex = -1;
-        boolean isFind = false;
-        for (int i  = 0 ; i < size ; i++){
-            if(isNull) {
-                if (membersArray[i] == null) {
-                    isFind = true;
-                    targetIndex = i;
-                }
-            }
-            if (o.equals(membersArray[i])) {
-                isFind = true;
-                targetIndex = i;
-            }
-            if (isFind){
-                int rightIndex = --size;
-                while (rightIndex > targetIndex){
-                    membersArray[targetIndex] = membersArray[++targetIndex];
-                    isFind =false;
-                }
-                i--;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Appends all of the elements in the specified collection to the end of
-     * this list, in the order that they are returned by the specified
-     * collection's iterator (optional operation).  The behavior of this
-     * operation is undefined if the specified collection is modified while
-     * the operation is in progress.  (Note that this will occur if the
-     * specified collection is this list, and it's nonempty.)
-     *
-     * @param c collection containing elements to be added to this list
-     * @return <tt>true</tt> if this list changed as a result of the call
-     * @throws UnsupportedOperationException if the <tt>addAll</tt> operation
-     *                                       is not supported by this list
-     * @throws ClassCastException            if the class of an element of the specified
-     *                                       collection prevents it from being added to this list
-     * @throws NullPointerException          if the specified collection contains one
-     *                                       or more null elements and this list does not permit null
-     *                                       elements, or if the specified collection is null
-     * @throws IllegalArgumentException      if some property of an element of the
-     *                                       specified collection prevents it from being added to this list
-     * @see #add(Object)
-     */
-    @Override
-    public boolean addAll(Collection c) {
-        return addAll(0,c);
-    }
-
-    /**
-     * Inserts all of the elements in the specified collection into this
-     * list at the specified position (optional operation).  Shifts the
-     * element currently at that position (if any) and any subsequent
-     * elements to the right (increases their indices).  The new elements
-     * will appear in this list in the order that they are returned by the
-     * specified collection's iterator.  The behavior of this operation is
-     * undefined if the specified collection is modified while the
-     * operation is in progress.  (Note that this will occur if the specified
-     * collection is this list, and it's nonempty.)
-     *
-     * @param index index at which to insert the first element from the
-     *              specified collection
-     * @param c     collection containing elements to be added to this list
-     * @return <tt>true</tt> if this list changed as a result of the call
-     * @throws UnsupportedOperationException if the <tt>addAll</tt> operation
-     *                                       is not supported by this list
-     * @throws ClassCastException            if the class of an element of the specified
-     *                                       collection prevents it from being added to this list
-     * @throws NullPointerException          if the specified collection contains one
-     *                                       or more null elements and this list does not permit null
-     *                                       elements, or if the specified collection is null
-     * @throws IllegalArgumentException      if some property of an element of the
-     *                                       specified collection prevents it from being added to this list
-     * @throws IndexOutOfBoundsException     if the index is out of range
-     *                                       (<tt>index &lt; 0 || index &gt; size()</tt>)
-     */
-    @Override
-    public boolean addAll(int index, Collection c) {
-        if (c == null)
-            return true;
-        int collectionAddSize =  c.size() - index + 1;
-        if(collectionAddSize < 1)
-            return true;
-        int sumSize =collectionAddSize + size;
-        if(sumSize > capacity){
-            capacity = (int)(sumSize * expansionCoe);
-            Object [] copyArr = new Object[capacity];
-            System.arraycopy(membersArray,0,copyArr,0,size);
-            membersArray = copyArr;
-        }
-        Iterator iterator = c.iterator();
+        Object [] arr = new Object[size];
         int startIndex = 0;
-        while (size <= sumSize && iterator.hasNext()){
-                if(startIndex++ >= index )
-                    membersArray[size++] = iterator.next();
-        }
-        return true;
-    }
-
-    /**
-     * Removes all of the elements from this list (optional operation).
-     * The list will be empty after this call returns.
-     *
-     * @throws UnsupportedOperationException if the <tt>clear</tt> operation
-     *                                       is not supported by this list
-     */
-    @Override
-    public void clear() {
-        if(isEmpty())
-            return;
-        while(size > 0){
-            membersArray[--size] = null;
-        }
-    }
-
-    /**
-     * Returns the element at the specified position in this list.
-     *
-     * @param index index of the element to return
-     * @return the element at the specified position in this list
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *                                   (<tt>index &lt; 0 || index &gt;= size()</tt>)
-     */
-    @Override
-    public E get(int index) {
-        if (isEmpty())
-            return null;
-        if (index < 0 || index >= size)
-            throw new IndexOutOfBoundsException();
-        return (E) membersArray[index];
-    }
-
-    /**
-     * Replaces the element at the specified position in this list with the
-     * specified element (optional operation).
-     *
-     * @param index   index of the element to replace
-     * @param element element to be stored at the specified position
-     * @return the element previously at the specified position
-     * @throws UnsupportedOperationException if the <tt>set</tt> operation
-     *                                       is not supported by this list
-     * @throws ClassCastException            if the class of the specified element
-     *                                       prevents it from being added to this list
-     * @throws NullPointerException          if the specified element is null and
-     *                                       this list does not permit null elements
-     * @throws IllegalArgumentException      if some property of the specified
-     *                                       element prevents it from being added to this list
-     * @throws IndexOutOfBoundsException     if the index is out of range
-     *                                       (<tt>index &lt; 0 || index &gt;= size()</tt>)
-     */
-    @Override
-    public Object set(int index, Object element) {
-        if(index < 0 || index >= size){
-            throw new IndexOutOfBoundsException();
-        }
-        Object preElement = get(index);
-        membersArray[index] = element;
-        return preElement;
-    }
-
-    /**
-     * Inserts the specified element at the specified position in this list
-     * (optional operation).  Shifts the element currently at that position
-     * (if any) and any subsequent elements to the right (adds one to their
-     * indices).
-     *
-     * @param index   index at which the specified element is to be inserted
-     * @param element element to be inserted
-     * @throws UnsupportedOperationException if the <tt>add</tt> operation
-     *                                       is not supported by this list
-     * @throws ClassCastException            if the class of the specified element
-     *                                       prevents it from being added to this list
-     * @throws NullPointerException          if the specified element is null and
-     *                                       this list does not permit null elements
-     * @throws IllegalArgumentException      if some property of the specified
-     *                                       element prevents it from being added to this list
-     * @throws IndexOutOfBoundsException     if the index is out of range
-     *                                       (<tt>index &lt; 0 || index &gt; size()</tt>)
-     */
-    @Override
-    public void add(int index, Object element) {
-        if(index < 0 || index > size){
-            throw new IndexOutOfBoundsException();
-        }
-        if((size + 1 ) > capacity){
-            capacity = (int)(capacity * expansionCoe);
-            Object [] copyArr = new Object[capacity];
-            System.arraycopy(membersArray,0,copyArr,0,index);
-            copyArr[index] = element;
-            System.arraycopy(membersArray,index,copyArr,index + 1,size - index );
-            membersArray = copyArr;
-        }else {
-            int currentRight = size;
-            while(index < currentRight ){
-                membersArray[currentRight] = membersArray[--currentRight];
-            }
-            membersArray[index] = element;
-        }
-    }
-
-    /**
-     * Removes the element at the specified position in this list (optional
-     * operation).  Shifts any subsequent elements to the left (subtracts one
-     * from their indices).  Returns the element that was removed from the
-     * list.
-     *
-     * @param index the index of the element to be removed
-     * @return the element previously at the specified position
-     * @throws UnsupportedOperationException if the <tt>remove</tt> operation
-     *                                       is not supported by this list
-     * @throws IndexOutOfBoundsException     if the index is out of range
-     *                                       (<tt>index &lt; 0 || index &gt;= size()</tt>)
-     */
-    @Override
-    public E remove(int index) {
-        if (index < 0 || index >= size())
-            throw new IndexOutOfBoundsException();
-        E removeElement = (E) membersArray[index];
-        for (int i = index ; i < size ; i ++){
-            membersArray[i] = membersArray[++i];
-        }
-        size--;
-        return removeElement;
-    }
-
-    /**
-     * Returns the index of the first occurrence of the specified element
-     * in this list, or -1 if this list does not contain the element.
-     * More formally, returns the lowest index <tt>i</tt> such that
-     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
-     * or -1 if there is no such index.
-     *
-     * @param o element to search for
-     * @return the index of the first occurrence of the specified element in
-     * this list, or -1 if this list does not contain the element
-     * @throws ClassCastException   if the type of the specified element
-     *                              is incompatible with this list
-     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws NullPointerException if the specified element is null and this
-     *                              list does not permit null elements
-     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
-     */
-    @Override
-    public int indexOf(Object o) {
-        if (isEmpty())
-            return -1;
-        boolean isNull = o == null;
-        for (int i = 0 ; i < size; i++){
-            if (isNull) {
-                if (membersArray[i] == null)
-                    return i;
-            }else {
-                if (o.equals(membersArray[i]))
-                    return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Returns the index of the last occurrence of the specified element
-     * in this list, or -1 if this list does not contain the element.
-     * More formally, returns the highest index <tt>i</tt> such that
-     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
-     * or -1 if there is no such index.
-     *
-     * @param o element to search for
-     * @return the index of the last occurrence of the specified element in
-     * this list, or -1 if this list does not contain the element
-     * @throws ClassCastException   if the type of the specified element
-     *                              is incompatible with this list
-     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws NullPointerException if the specified element is null and this
-     *                              list does not permit null elements
-     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
-     */
-    @Override
-    public int lastIndexOf(Object o) {
-        if (isEmpty())
-            return -1;
-        boolean isNull = o == null;
-        for (int i = size - 1 ; i >= 0; i--){
-            if (isNull) {
-                if (membersArray[i] == null)
-                    return i;
-            }else {
-                if (o.equals(membersArray[i]))
-                    return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Returns a list iterator over the elements in this list (in proper
-     * sequence).
-     *
-     * @return a list iterator over the elements in this list (in proper
-     * sequence)
-     */
-    @Override
-    public ListIterator listIterator() {
-        return new ArrayListIterator<>(0);
-    }
-
-    /**
-     * Returns a list iterator over the elements in this list (in proper
-     * sequence), starting at the specified position in the list.
-     * The specified index indicates the first element that would be
-     * returned by an initial call to {@link ListIterator#next next}.
-     * An initial call to {@link ListIterator#previous previous} would
-     * return the element with the specified index minus one.
-     *
-     * @param index index of the first element to be returned from the
-     *              list iterator (by a call to {@link ListIterator#next next})
-     * @return a list iterator over the elements in this list (in proper
-     * sequence), starting at the specified position in the list
-     * @throws IndexOutOfBoundsException if the index is out of range
-     *                                   ({@code index < 0 || index > size()})
-     */
-    @Override
-    public ListIterator listIterator(int index) {
-        return new ArrayListIterator<>(index);
-    }
-
-    /**
-     * Returns a view of the portion of this list between the specified
-     * <tt>fromIndex</tt>, inclusive, and <tt>toIndex</tt>, exclusive.  (If
-     * <tt>fromIndex</tt> and <tt>toIndex</tt> are equal, the returned list is
-     * empty.)  The returned list is backed by this list, so non-structural
-     * changes in the returned list are reflected in this list, and vice-versa.
-     * The returned list supports all of the optional list operations supported
-     * by this list.<p>
-     * <p/>
-     * This method eliminates the need for explicit range operations (of
-     * the sort that commonly exist for arrays).  Any operation that expects
-     * a list can be used as a range operation by passing a subList view
-     * instead of a whole list.  For example, the following idiom
-     * removes a range of elements from a list:
-     * <pre>
-     *      list.subList(from, to).clear();
-     * </pre>
-     * Similar idioms may be constructed for <tt>indexOf</tt> and
-     * <tt>lastIndexOf</tt>, and all of the algorithms in the
-     * <tt>Collections</tt> class can be applied to a subList.<p>
-     * <p/>
-     * The semantics of the list returned by this method become undefined if
-     * the backing list (i.e., this list) is <i>structurally modified</i> in
-     * any way other than via the returned list.  (Structural modifications are
-     * those that change the size of this list, or otherwise perturb it in such
-     * a fashion that iterations in progress may yield incorrect results.)
-     *
-     * @param fromIndex low endpoint (inclusive) of the subList
-     * @param toIndex   high endpoint (exclusive) of the subList
-     * @return a view of the specified range within this list
-     * @throws IndexOutOfBoundsException for an illegal endpoint index value
-     *                                   (<tt>fromIndex &lt; 0 || toIndex &gt; size ||
-     *                                   fromIndex &gt; toIndex</tt>)
-     */
-    @Override
-    public List subList(int fromIndex, int toIndex) {
-        if (fromIndex < 0 || fromIndex > toIndex || toIndex >= size)
-            throw  new IndexOutOfBoundsException();
-        int cap = toIndex - fromIndex;
-        ArrayListImpl returnList = new ArrayListImpl(cap);
-        while(fromIndex < toIndex){
-            returnList.add(fromIndex++);
-        }
-        return returnList;
-    }
-
-    /**
-     * Retains only the elements in this list that are contained in the
-     * specified collection (optional operation).  In other words, removes
-     * from this list all of its elements that are not contained in the
-     * specified collection.
-     *
-     * @param c collection containing elements to be retained in this list
-     * @return <tt>true</tt> if this list changed as a result of the call
-     * @throws UnsupportedOperationException if the <tt>retainAll</tt> operation
-     *                                       is not supported by this list
-     * @throws ClassCastException            if the class of an element of this list
-     *                                       is incompatible with the specified collection
-     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws NullPointerException          if this list contains a null element and the
-     *                                       specified collection does not permit null elements
-     *                                       (<a href="Collection.html#optional-restrictions">optional</a>),
-     *                                       or if the specified collection is null
-     * @see #remove(Object)
-     * @see #contains(Object)
-     */
-    @Override
-    public boolean retainAll(Collection c) {
-        if(c == null)
-            throw new NullPointerException();
-        if (isEmpty() && c.size() > 0)
-            return false;
-        Set set = new HashSet<>(c.size());
-        for (Object o : c){
-            set.add(c);
-        }
-        Object [] resultArr = new Object[c.size() > size() ? size() : c.size()];
-        int index = 0;
-        for (Object e : membersArray){
-            if (set.contains(e))
-                resultArr[index++] = e;
-        }
-        membersArray = resultArr;
-        return true;
-    }
-
-    /**
-     * Removes from this list all of its elements that are contained in the
-     * specified collection (optional operation).
-     *
-     * @param c collection containing elements to be removed from this list
-     * @return <tt>true</tt> if this list changed as a result of the call
-     * @throws UnsupportedOperationException if the <tt>removeAll</tt> operation
-     *                                       is not supported by this list
-     * @throws ClassCastException            if the class of an element of this list
-     *                                       is incompatible with the specified collection
-     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws NullPointerException          if this list contains a null element and the
-     *                                       specified collection does not permit null elements
-     *                                       (<a href="Collection.html#optional-restrictions">optional</a>),
-     *                                       or if the specified collection is null
-     * @see #remove(Object)
-     * @see #contains(Object)
-     */
-    @Override
-    public boolean removeAll(Collection c) {
-        if (c == null)
-            throw new NullPointerException();
-        if (c.size() < 1)
-            return true;
-        if (isEmpty())
-            return true;
-        Set<Integer> indexSet = new HashSet<>(size() > c.size() ? c.size() : size());
-        Set targetSet = null;
-        if( c instanceof Set)
-            targetSet = (Set) c;
-        else
-            targetSet = new HashSet<>();
-        for (Object o : c){
-            targetSet.add(o);
-        }
-        for (int i = 0 ; i < size ; i++){
-            if (targetSet.contains(membersArray[i]))
-                indexSet.add(i);
-        }
-        if (size  == indexSet.size())
-            clear();
-        Object [] resultArr = new Object[size - indexSet.size()];
-        int oldSize = size;
-        size = 0;
-        for(int i = 0 ; i < oldSize ; i++){
-            if(!indexSet.contains(i)){
-                resultArr[size++] = membersArray[i];
-            }
-        }
-        membersArray = resultArr;
-        return true;
-    }
-
-    /**
-     * Returns <tt>true</tt> if this list contains all of the elements of the
-     * specified collection.
-     *
-     * @param c collection to be checked for containment in this list
-     * @return <tt>true</tt> if this list contains all of the elements of the
-     * specified collection
-     * @throws ClassCastException   if the types of one or more elements
-     *                              in the specified collection are incompatible with this
-     *                              list
-     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
-     * @throws NullPointerException if the specified collection contains one
-     *                              or more null elements and this list does not permit null
-     *                              elements
-     *                              (<a href="Collection.html#optional-restrictions">optional</a>),
-     *                              or if the specified collection is null
-     * @see #contains(Object)
-     */
-    @Override
-    public boolean containsAll(Collection c) {
-        if(c == null)
-            throw new NullPointerException();
-        if (isEmpty() && c.size() > 0)
-            return false;
-        Set set = new HashSet<>(size());
-        for (Object o : this){
-            set.add(c);
-        }
-        for (Object e : c){
-            if (!set.contains(e))
-                return false;
-        }
-        return true;
+       synchronized (this){
+           for (E e : this){
+               arr[startIndex++] = e;
+           }
+       }
+        return arr;
     }
 
     /**
@@ -711,25 +149,489 @@ public class ArrayListImpl<E> implements List<E> {
      * @throws NullPointerException if the specified array is null
      */
     @Override
-    public Object[] toArray(Object[] a) {
-        return new Object[0];
+    public <T> T[] toArray(T[] a) {
+        if (a.length > size){
+            a[size] = null;
+            return a;
+        }
+        if (a.length < size) {
+            a = (T[]) java.lang.reflect.Array.
+                    newInstance(a.getClass().getComponentType(), size);
+            int startIndex = 0;
+            synchronized (this) {
+                for (E e : this) {
+                    try {
+                        a[startIndex++] = (T) e;
+                    } catch (Exception ex) {
+                        throw new ArrayStoreException();
+                    }
+                }
+            }
+        }
+        return a;
     }
 
-    private class ArrayListIterator<E> implements ListIterator<E>{
+    /**
+     * Appends the specified element to the end of this list (optional
+     * operation).
+     * <p/>
+     * <p>Lists that support this operation may place limitations on what
+     * elements may be added to this list.  In particular, some
+     * lists will refuse to add null elements, and others will impose
+     * restrictions on the type of elements that may be added.  List
+     * classes should clearly specify in their documentation any restrictions
+     * on what elements may be added.
+     *
+     * @param e element to be appended to this list
+     * @return <tt>true</tt> (as specified by {@link Collection#add})
+     * @throws UnsupportedOperationException if the <tt>add</tt> operation
+     *                                       is not supported by this list
+     * @throws ClassCastException            if the class of the specified element
+     *                                       prevents it from being added to this list
+     * @throws NullPointerException          if the specified element is null and this
+     *                                       list does not permit null elements
+     * @throws IllegalArgumentException      if some property of this element
+     *                                       prevents it from being added to this list
+     */
+    @Override
+    public boolean add(E e) {
+        tailNode.preNode = tailNode.preNode.nextNode = new Node(tailNode.preNode,tailNode,e);
+        size++;
+        return true;
+    }
 
-        public ArrayListIterator(int index){
-            if (index < 0 || index >= size)
-                throw new IndexOutOfBoundsException();
-            currentIndex = index;
+    /**
+     * Removes the first occurrence of the specified element from this list,
+     * if it is present (optional operation).  If this list does not contain
+     * the element, it is unchanged.  More formally, removes the element with
+     * the lowest index <tt>i</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>
+     * (if such an element exists).  Returns <tt>true</tt> if this list
+     * contained the specified element (or equivalently, if this list changed
+     * as a result of the call).
+     *
+     * @param o element to be removed from this list, if present
+     * @return <tt>true</tt> if this list contained the specified element
+     * @throws ClassCastException            if the type of the specified element
+     *                                       is incompatible with this list
+     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException          if the specified element is null and this
+     *                                       list does not permit null elements
+     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws UnsupportedOperationException if the <tt>remove</tt> operation
+     *                                       is not supported by this list
+     */
+    @Override
+    public boolean remove(Object o) {
+        Node rightNode = headNode.nextNode;
+        boolean isNull = o == null;
+        while (rightNode != null && rightNode.nextNode != null){
+            if (isNull)
+                if (rightNode.data == null) {
+                    rightNode.preNode.nextNode = rightNode.nextNode;
+                    rightNode.nextNode.preNode = rightNode.preNode;
+                    size--;
+                    return true;
+                }
+            if (o.equals(rightNode.data)) {
+                rightNode.preNode.nextNode = rightNode.nextNode;
+                rightNode.nextNode.preNode = rightNode.preNode;
+                size--;
+                return true;
+            }
+            rightNode = rightNode.nextNode;
+        }
+        return false;
+
+    }
+
+    /**
+     * Returns <tt>true</tt> if this list contains all of the elements of the
+     * specified collection.
+     *
+     * @param c collection to be checked for containment in this list
+     * @return <tt>true</tt> if this list contains all of the elements of the
+     * specified collection
+     * @throws ClassCastException   if the types of one or more elements
+     *                              in the specified collection are incompatible with this
+     *                              list
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException if the specified collection contains one
+     *                              or more null elements and this list does not permit null
+     *                              elements
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>),
+     *                              or if the specified collection is null
+     * @see #contains(Object)
+     */
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return false;
+    }
+
+    /**
+     * Appends all of the elements in the specified collection to the end of
+     * this list, in the order that they are returned by the specified
+     * collection's iterator (optional operation).  The behavior of this
+     * operation is undefined if the specified collection is modified while
+     * the operation is in progress.  (Note that this will occur if the
+     * specified collection is this list, and it's nonempty.)
+     *
+     * @param c collection containing elements to be added to this list
+     * @return <tt>true</tt> if this list changed as a result of the call
+     * @throws UnsupportedOperationException if the <tt>addAll</tt> operation
+     *                                       is not supported by this list
+     * @throws ClassCastException            if the class of an element of the specified
+     *                                       collection prevents it from being added to this list
+     * @throws NullPointerException          if the specified collection contains one
+     *                                       or more null elements and this list does not permit null
+     *                                       elements, or if the specified collection is null
+     * @throws IllegalArgumentException      if some property of an element of the
+     *                                       specified collection prevents it from being added to this list
+     * @see #add(Object)
+     */
+    @Override
+    public boolean addAll(Collection<? extends E> c) {
+        for (E e : c){
+            add(e);
+        }
+        return true;
+    }
+
+    /**
+     * Inserts all of the elements in the specified collection into this
+     * list at the specified position (optional operation).  Shifts the
+     * element currently at that position (if any) and any subsequent
+     * elements to the right (increases their indices).  The new elements
+     * will appear in this list in the order that they are returned by the
+     * specified collection's iterator.  The behavior of this operation is
+     * undefined if the specified collection is modified while the
+     * operation is in progress.  (Note that this will occur if the specified
+     * collection is this list, and it's nonempty.)
+     *
+     * @param index index at which to insert the first element from the
+     *              specified collection
+     * @param c     collection containing elements to be added to this list
+     * @return <tt>true</tt> if this list changed as a result of the call
+     * @throws UnsupportedOperationException if the <tt>addAll</tt> operation
+     *                                       is not supported by this list
+     * @throws ClassCastException            if the class of an element of the specified
+     *                                       collection prevents it from being added to this list
+     * @throws NullPointerException          if the specified collection contains one
+     *                                       or more null elements and this list does not permit null
+     *                                       elements, or if the specified collection is null
+     * @throws IllegalArgumentException      if some property of an element of the
+     *                                       specified collection prevents it from being added to this list
+     * @throws IndexOutOfBoundsException     if the index is out of range
+     *                                       (<tt>index &lt; 0 || index &gt; size()</tt>)
+     */
+    @Override
+    public boolean addAll(int index, Collection<? extends E> c) {
+        if(index < 0 || index > c.size())
+            throw new IndexOutOfBoundsException();
+        Iterator<? extends E> iterator = c.iterator();
+        int startIndex = 0;
+        while (iterator.hasNext()){
+            E e = iterator.next();
+            if (startIndex++ < size)
+                add(e);
+        }
+        return true;
+    }
+
+    /**
+     * Removes from this list all of its elements that are contained in the
+     * specified collection (optional operation).
+     *
+     * @param c collection containing elements to be removed from this list
+     * @return <tt>true</tt> if this list changed as a result of the call
+     * @throws UnsupportedOperationException if the <tt>removeAll</tt> operation
+     *                                       is not supported by this list
+     * @throws ClassCastException            if the class of an element of this list
+     *                                       is incompatible with the specified collection
+     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException          if this list contains a null element and the
+     *                                       specified collection does not permit null elements
+     *                                       (<a href="Collection.html#optional-restrictions">optional</a>),
+     *                                       or if the specified collection is null
+     * @see #remove(Object)
+     * @see #contains(Object)
+     */
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        if (this.isEmpty())
+            return true;
+        Iterator<?> iterator = c.iterator();
+        Set set = new HashSet<>();
+        while (iterator.hasNext()){
+            Object obj = iterator.next();
+            set.add(obj);
+        }
+        Iterator<E> listIterator = iterator();
+        while(iterator.hasNext()){
+            E e = listIterator.next();
+            if (set.contains(e))
+                listIterator.remove();
+        }
+        return true;
+    }
+
+    /**
+     * Retains only the elements in this list that are contained in the
+     * specified collection (optional operation).  In other words, removes
+     * from this list all of its elements that are not contained in the
+     * specified collection.
+     *
+     * @param c collection containing elements to be retained in this list
+     * @return <tt>true</tt> if this list changed as a result of the call
+     * @throws UnsupportedOperationException if the <tt>retainAll</tt> operation
+     *                                       is not supported by this list
+     * @throws ClassCastException            if the class of an element of this list
+     *                                       is incompatible with the specified collection
+     *                                       (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException          if this list contains a null element and the
+     *                                       specified collection does not permit null elements
+     *                                       (<a href="Collection.html#optional-restrictions">optional</a>),
+     *                                       or if the specified collection is null
+     * @see #remove(Object)
+     * @see #contains(Object)
+     */
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return false;
+    }
+
+    /**
+     * Removes all of the elements from this list (optional operation).
+     * The list will be empty after this call returns.
+     *
+     * @throws UnsupportedOperationException if the <tt>clear</tt> operation
+     *                                       is not supported by this list
+     */
+    @Override
+    public void clear() {
+        headNode.nextNode = tailNode;
+        tailNode.preNode = headNode;
+        size = 0;
+    }
+
+    /**
+     * Returns the element at the specified position in this list.
+     *
+     * @param index index of the element to return
+     * @return the element at the specified position in this list
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *                                   (<tt>index &lt; 0 || index &gt;= size()</tt>)
+     */
+    @Override
+    public E get(int index) {
+        return null;
+    }
+
+    /**
+     * Replaces the element at the specified position in this list with the
+     * specified element (optional operation).
+     *
+     * @param index   index of the element to replace
+     * @param element element to be stored at the specified position
+     * @return the element previously at the specified position
+     * @throws UnsupportedOperationException if the <tt>set</tt> operation
+     *                                       is not supported by this list
+     * @throws ClassCastException            if the class of the specified element
+     *                                       prevents it from being added to this list
+     * @throws NullPointerException          if the specified element is null and
+     *                                       this list does not permit null elements
+     * @throws IllegalArgumentException      if some property of the specified
+     *                                       element prevents it from being added to this list
+     * @throws IndexOutOfBoundsException     if the index is out of range
+     *                                       (<tt>index &lt; 0 || index &gt;= size()</tt>)
+     */
+    @Override
+    public E set(int index, E element) {
+        return null;
+    }
+
+    /**
+     * Inserts the specified element at the specified position in this list
+     * (optional operation).  Shifts the element currently at that position
+     * (if any) and any subsequent elements to the right (adds one to their
+     * indices).
+     *
+     * @param index   index at which the specified element is to be inserted
+     * @param element element to be inserted
+     * @throws UnsupportedOperationException if the <tt>add</tt> operation
+     *                                       is not supported by this list
+     * @throws ClassCastException            if the class of the specified element
+     *                                       prevents it from being added to this list
+     * @throws NullPointerException          if the specified element is null and
+     *                                       this list does not permit null elements
+     * @throws IllegalArgumentException      if some property of the specified
+     *                                       element prevents it from being added to this list
+     * @throws IndexOutOfBoundsException     if the index is out of range
+     *                                       (<tt>index &lt; 0 || index &gt; size()</tt>)
+     */
+    @Override
+    public void add(int index, E element) {
+
+    }
+
+    /**
+     * Removes the element at the specified position in this list (optional
+     * operation).  Shifts any subsequent elements to the left (subtracts one
+     * from their indices).  Returns the element that was removed from the
+     * list.
+     *
+     * @param index the index of the element to be removed
+     * @return the element previously at the specified position
+     * @throws UnsupportedOperationException if the <tt>remove</tt> operation
+     *                                       is not supported by this list
+     * @throws IndexOutOfBoundsException     if the index is out of range
+     *                                       (<tt>index &lt; 0 || index &gt;= size()</tt>)
+     */
+    @Override
+    public E remove(int index) {
+        return null;
+    }
+
+    /**
+     * Returns the index of the first occurrence of the specified element
+     * in this list, or -1 if this list does not contain the element.
+     * More formally, returns the lowest index <tt>i</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
+     * or -1 if there is no such index.
+     *
+     * @param o element to search for
+     * @return the index of the first occurrence of the specified element in
+     * this list, or -1 if this list does not contain the element
+     * @throws ClassCastException   if the type of the specified element
+     *                              is incompatible with this list
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException if the specified element is null and this
+     *                              list does not permit null elements
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     */
+    @Override
+    public int indexOf(Object o) {
+        return 0;
+    }
+
+    /**
+     * Returns the index of the last occurrence of the specified element
+     * in this list, or -1 if this list does not contain the element.
+     * More formally, returns the highest index <tt>i</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
+     * or -1 if there is no such index.
+     *
+     * @param o element to search for
+     * @return the index of the last occurrence of the specified element in
+     * this list, or -1 if this list does not contain the element
+     * @throws ClassCastException   if the type of the specified element
+     *                              is incompatible with this list
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException if the specified element is null and this
+     *                              list does not permit null elements
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     */
+    @Override
+    public int lastIndexOf(Object o) {
+        return 0;
+    }
+
+    /**
+     * Returns a list iterator over the elements in this list (in proper
+     * sequence).
+     *
+     * @return a list iterator over the elements in this list (in proper
+     * sequence)
+     */
+    @Override
+    public ListIterator<E> listIterator() {
+        return new LinkedListIterator<E>();
+    }
+
+    /**
+     * Returns a list iterator over the elements in this list (in proper
+     * sequence), starting at the specified position in the list.
+     * The specified index indicates the first element that would be
+     * returned by an initial call to {@link ListIterator#next next}.
+     * An initial call to {@link ListIterator#previous previous} would
+     * return the element with the specified index minus one.
+     *
+     * @param index index of the first element to be returned from the
+     *              list iterator (by a call to {@link ListIterator#next next})
+     * @return a list iterator over the elements in this list (in proper
+     * sequence), starting at the specified position in the list
+     * @throws IndexOutOfBoundsException if the index is out of range
+     *                                   ({@code index < 0 || index > size()})
+     */
+    @Override
+    public ListIterator<E> listIterator(int index) {
+        return new LinkedListIterator<>(index);
+    }
+
+    /**
+     * Returns a view of the portion of this list between the specified
+     * <tt>fromIndex</tt>, inclusive, and <tt>toIndex</tt>, exclusive.  (If
+     * <tt>fromIndex</tt> and <tt>toIndex</tt> are equal, the returned list is
+     * empty.)  The returned list is backed by this list, so non-structural
+     * changes in the returned list are reflected in this list, and vice-versa.
+     * The returned list supports all of the optional list operations supported
+     * by this list.<p>
+     * <p/>
+     * This method eliminates the need for explicit range operations (of
+     * the sort that commonly exist for arrays).  Any operation that expects
+     * a list can be used as a range operation by passing a subList view
+     * instead of a whole list.  For example, the following idiom
+     * removes a range of elements from a list:
+     * <pre>
+     *      list.subList(from, to).clear();
+     * </pre>
+     * Similar idioms may be constructed for <tt>indexOf</tt> and
+     * <tt>lastIndexOf</tt>, and all of the algorithms in the
+     * <tt>Collections</tt> class can be applied to a subList.<p>
+     * <p/>
+     * The semantics of the list returned by this method become undefined if
+     * the backing list (i.e., this list) is <i>structurally modified</i> in
+     * any way other than via the returned list.  (Structural modifications are
+     * those that change the size of this list, or otherwise perturb it in such
+     * a fashion that iterations in progress may yield incorrect results.)
+     *
+     * @param fromIndex low endpoint (inclusive) of the subList
+     * @param toIndex   high endpoint (exclusive) of the subList
+     * @return a view of the specified range within this list
+     * @throws IndexOutOfBoundsException for an illegal endpoint index value
+     *                                   (<tt>fromIndex &lt; 0 || toIndex &gt; size ||
+     *                                   fromIndex &gt; toIndex</tt>)
+     */
+    @Override
+    public List<E> subList(int fromIndex, int toIndex) {
+        return null;
+    }
+
+    private class LinkedListIterator<E> implements ListIterator<E>{
+
+        private LinkedListImpl thisList = LinkedListImpl.this;
+
+        private int currentSize;
+
+        private int currentIndex;
+
+        private Node<E> currentNode;
+
+        public LinkedListIterator(){
+            currentNode = headNode.nextNode;
+            currentSize = size;
         }
 
-        private ArrayListImpl arrayList = ArrayListImpl.this;
+        public LinkedListIterator(int currentIndex) {
+            this();
+            if (currentIndex < 0 || currentIndex > currentSize)
+                throw  new IndexOutOfBoundsException();
 
-        private int currentIndex = 0;
+            while(this.currentIndex++ < currentIndex){
+                currentNode = currentNode.nextNode;
+            }
+        }
 
-        private int size = arrayList.size;
-
-        private int cap = arrayList.capacity;
         /**
          * Returns {@code true} if this list iterator has more elements when
          * traversing the list in the forward direction. (In other words,
@@ -739,14 +641,15 @@ public class ArrayListImpl<E> implements List<E> {
          * @return {@code true} if the list iterator has more elements when
          * traversing the list in the forward direction
          */
-        private boolean checkSize(){
-            return size != arrayList.size;
+
+        public void checkConcurrentModification(){
+            if (currentSize != size)
+                throw new ConcurrentModificationException();
         }
         @Override
         public boolean hasNext() {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            return currentIndex < size;
+            checkConcurrentModification();
+            return  currentNode != null && currentNode.nextNode != null;
         }
 
         /**
@@ -761,9 +664,12 @@ public class ArrayListImpl<E> implements List<E> {
          */
         @Override
         public E next() {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            return (E) arrayList.membersArray[currentIndex++];
+            if (!hasNext())
+                throw new NoSuchElementException();
+            E element = currentNode.data;
+            currentNode = currentNode.nextNode;
+            currentIndex++;
+            return element;
         }
 
         /**
@@ -777,9 +683,8 @@ public class ArrayListImpl<E> implements List<E> {
          */
         @Override
         public boolean hasPrevious() {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            return currentIndex > 0;
+            checkConcurrentModification();
+            return currentNode != null && currentNode.preNode != null;
         }
 
         /**
@@ -796,9 +701,12 @@ public class ArrayListImpl<E> implements List<E> {
          */
         @Override
         public E previous() {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            return (E) arrayList.membersArray[--currentIndex];
+            if (!hasPrevious())
+                throw new NoSuchElementException();
+            E element = currentNode.data;
+            currentNode = currentNode.preNode;
+            currentIndex--;
+            return element;
         }
 
         /**
@@ -812,11 +720,7 @@ public class ArrayListImpl<E> implements List<E> {
          */
         @Override
         public int nextIndex() {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            if (size - 1 == currentIndex)
-                return size;
-            return currentIndex + 1;
+            return currentIndex < currentSize ? currentIndex + 1 : currentSize;
         }
 
         /**
@@ -830,9 +734,7 @@ public class ArrayListImpl<E> implements List<E> {
          */
         @Override
         public int previousIndex() {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            return currentIndex == 0 ? -1 : currentIndex - 1;
+            return currentIndex > 0 ? currentIndex - 1 : 0;
         }
 
         /**
@@ -851,17 +753,13 @@ public class ArrayListImpl<E> implements List<E> {
          */
         @Override
         public void remove() {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            synchronized (arrayList.membersArray){
-                if (size > 0){
-                    for (int leftIndex = currentIndex; leftIndex < size -1 ;){
-                        arrayList.membersArray[leftIndex] = arrayList.membersArray[++leftIndex];
-                    }
-                }
-                arrayList.size--;
-                size--;
-            }
+            checkConcurrentModification();
+            currentNode = currentNode.preNode;
+            currentNode.preNode.nextNode = currentNode.nextNode;
+            currentNode.nextNode.preNode = currentNode.preNode;
+            currentSize--;
+            size--;
+            currentNode = currentNode.nextNode;
         }
 
         /**
@@ -871,7 +769,7 @@ public class ArrayListImpl<E> implements List<E> {
          * #add} have been called after the last call to {@code next} or
          * {@code previous}.
          *
-         * @param o the element with which to replace the last element returned by
+         * @param e the element with which to replace the last element returned by
          *          {@code next} or {@code previous}
          * @throws UnsupportedOperationException if the {@code set} operation
          *                                       is not supported by this list iterator
@@ -885,10 +783,8 @@ public class ArrayListImpl<E> implements List<E> {
          *                                       {@code next} or {@code previous}
          */
         @Override
-        public void set(E o) {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            arrayList.membersArray[currentIndex - 1 ]  = o;
+        public void set(E e) {
+            currentNode.preNode.data = e;
         }
 
         /**
@@ -903,7 +799,7 @@ public class ArrayListImpl<E> implements List<E> {
          * (This call increases by one the value that would be returned by a
          * call to {@code nextIndex} or {@code previousIndex}.)
          *
-         * @param o the element to insert
+         * @param e the element to insert
          * @throws UnsupportedOperationException if the {@code add} method is
          *                                       not supported by this list iterator
          * @throws ClassCastException            if the class of the specified element
@@ -912,10 +808,29 @@ public class ArrayListImpl<E> implements List<E> {
          *                                       prevents it from being added to this list
          */
         @Override
-        public void add(Object o) {
-            if (checkSize())
-                throw new ConcurrentModificationException();
-            arrayList.set(currentIndex,o);
+        public void add(E e) {
+            Node preNode = currentNode.preNode;
+            preNode.nextNode = preNode.nextNode.preNode = new Node(preNode,preNode.nextNode,e);
+            size++;
+            currentSize++;
+        }
+    }
+
+    private static class Node<E>{
+
+        public Node preNode;
+
+        public Node nextNode;
+
+        public E data;
+
+        public Node() {
+        }
+
+        public Node(Node preNode, Node nextNode, E data) {
+            this.preNode = preNode;
+            this.nextNode = nextNode;
+            this.data = data;
         }
     }
 }
