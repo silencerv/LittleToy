@@ -4,8 +4,11 @@ import java.util.*;
 
 /**
  * Created by v on 2016/8/15.
+ * @author  v
+ * 双向链表  实现了queue和stack
+ *
  */
-public class LinkedListImpl<E> implements List<E> {
+public class LinkedListImpl<E> implements List<E>,Deque<E> {
 
     private int size;
 
@@ -80,6 +83,19 @@ public class LinkedListImpl<E> implements List<E> {
     @Override
     public Iterator<E> iterator() {
         return listIterator();
+    }
+
+    /**
+     * Returns an iterator over the elements in this deque in reverse
+     * sequential order.  The elements will be returned in order from
+     * last (tail) to first (head).
+     *
+     * @return an iterator over the elements in this deque in reverse
+     * sequence
+     */
+    @Override
+    public Iterator<E> descendingIterator() {
+        return null;
     }
 
     /**
@@ -172,6 +188,273 @@ public class LinkedListImpl<E> implements List<E> {
     }
 
     /**
+     * Inserts the specified element at the front of this deque if it is
+     * possible to do so immediately without violating capacity restrictions.
+     * When using a capacity-restricted deque, it is generally preferable to
+     * use method {@link #offerFirst}.
+     *
+     * @param e the element to add
+     * @throws IllegalStateException    if the element cannot be added at this
+     *                                  time due to capacity restrictions
+     * @throws ClassCastException       if the class of the specified element
+     *                                  prevents it from being added to this deque
+     * @throws NullPointerException     if the specified element is null and this
+     *                                  deque does not permit null elements
+     * @throws IllegalArgumentException if some property of the specified
+     *                                  element prevents it from being added to this deque
+     */
+    @Override
+    public void addFirst(E e) {
+        headNode.nextNode = headNode.nextNode.preNode = new Node<>(headNode,headNode.nextNode,e);
+        size++;
+    }
+
+    /**
+     * Inserts the specified element at the end of this deque if it is
+     * possible to do so immediately without violating capacity restrictions.
+     * When using a capacity-restricted deque, it is generally preferable to
+     * use method {@link #offerLast}.
+     * <p/>
+     * <p>This method is equivalent to {@link #add}.
+     *
+     * @param e the element to add
+     * @throws IllegalStateException    if the element cannot be added at this
+     *                                  time due to capacity restrictions
+     * @throws ClassCastException       if the class of the specified element
+     *                                  prevents it from being added to this deque
+     * @throws NullPointerException     if the specified element is null and this
+     *                                  deque does not permit null elements
+     * @throws IllegalArgumentException if some property of the specified
+     *                                  element prevents it from being added to this deque
+     */
+    @Override
+    public void addLast(E e) {
+        add(e);
+    }
+
+    /**
+     * Inserts the specified element at the front of this deque unless it would
+     * violate capacity restrictions.  When using a capacity-restricted deque,
+     * this method is generally preferable to the {@link #addFirst} method,
+     * which can fail to insert an element only by throwing an exception.
+     *
+     * @param e the element to add
+     * @return <tt>true</tt> if the element was added to this deque, else
+     * <tt>false</tt>
+     * @throws ClassCastException       if the class of the specified element
+     *                                  prevents it from being added to this deque
+     * @throws NullPointerException     if the specified element is null and this
+     *                                  deque does not permit null elements
+     * @throws IllegalArgumentException if some property of the specified
+     *                                  element prevents it from being added to this deque
+     */
+    @Override
+    public boolean offerFirst(E e) {
+        try {
+            addFirst(e);
+            return true;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+
+    /**
+     * Inserts the specified element at the end of this deque unless it would
+     * violate capacity restrictions.  When using a capacity-restricted deque,
+     * this method is generally preferable to the {@link #addLast} method,
+     * which can fail to insert an element only by throwing an exception.
+     *
+     * @param e the element to add
+     * @return <tt>true</tt> if the element was added to this deque, else
+     * <tt>false</tt>
+     * @throws ClassCastException       if the class of the specified element
+     *                                  prevents it from being added to this deque
+     * @throws NullPointerException     if the specified element is null and this
+     *                                  deque does not permit null elements
+     * @throws IllegalArgumentException if some property of the specified
+     *                                  element prevents it from being added to this deque
+     */
+    @Override
+    public boolean offerLast(E e) {
+        return add(e);
+    }
+
+    /**
+     * Retrieves and removes the first element of this deque.  This method
+     * differs from {@link #pollFirst pollFirst} only in that it throws an
+     * exception if this deque is empty.
+     *
+     * @return the head of this deque
+     * @throws NoSuchElementException if this deque is empty
+     */
+    @Override
+    public E removeFirst() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        Node<E> currentNode = headNode.nextNode;
+        if(currentNode != null && currentNode.nextNode != null){
+            currentNode.preNode.nextNode = currentNode.nextNode;
+            currentNode.nextNode.preNode = currentNode.preNode;
+            size--;
+        }
+        return currentNode.data;
+    }
+
+    /**
+     * Retrieves and removes the last element of this deque.  This method
+     * differs from {@link #pollLast pollLast} only in that it throws an
+     * exception if this deque is empty.
+     *
+     * @return the tail of this deque
+     * @throws NoSuchElementException if this deque is empty
+     */
+    @Override
+    public E removeLast() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        Node<E> currentNode = tailNode.preNode;
+        if(currentNode != null && currentNode.preNode != null){
+            currentNode.preNode.nextNode = currentNode.nextNode;
+            currentNode.nextNode.preNode = currentNode.preNode;
+            size--;
+        }
+        return currentNode.data;
+    }
+
+    /**
+     * Retrieves and removes the first element of this deque,
+     * or returns <tt>null</tt> if this deque is empty.
+     *
+     * @return the head of this deque, or <tt>null</tt> if this deque is empty
+     */
+    @Override
+    public E pollFirst() {
+        try{
+            return removeFirst();
+        }catch (NoSuchElementException ex){
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves and removes the last element of this deque,
+     * or returns <tt>null</tt> if this deque is empty.
+     *
+     * @return the tail of this deque, or <tt>null</tt> if this deque is empty
+     */
+    @Override
+    public E pollLast() {
+        try{
+            return removeLast();
+        }catch (NoSuchElementException ex){
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves, but does not remove, the first element of this deque.
+     * <p/>
+     * This method differs from {@link #peekFirst peekFirst} only in that it
+     * throws an exception if this deque is empty.
+     *
+     * @return the head of this deque
+     * @throws NoSuchElementException if this deque is empty
+     */
+    @Override
+    public E getFirst() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        return headNode.nextNode.data;
+    }
+
+    /**
+     * Retrieves, but does not remove, the last element of this deque.
+     * This method differs from {@link #peekLast peekLast} only in that it
+     * throws an exception if this deque is empty.
+     *
+     * @return the tail of this deque
+     * @throws NoSuchElementException if this deque is empty
+     */
+    @Override
+    public E getLast() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        return tailNode.preNode.data;
+    }
+
+    /**
+     * Retrieves, but does not remove, the first element of this deque,
+     * or returns <tt>null</tt> if this deque is empty.
+     *
+     * @return the head of this deque, or <tt>null</tt> if this deque is empty
+     */
+    @Override
+    public E peekFirst() {
+        return headNode.nextNode.data;
+    }
+
+    /**
+     * Retrieves, but does not remove, the last element of this deque,
+     * or returns <tt>null</tt> if this deque is empty.
+     *
+     * @return the tail of this deque, or <tt>null</tt> if this deque is empty
+     */
+    @Override
+    public E peekLast() {
+        return tailNode.preNode.data;
+    }
+
+    /**
+     * Removes the first occurrence of the specified element from this deque.
+     * If the deque does not contain the element, it is unchanged.
+     * More formally, removes the first element <tt>e</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>
+     * (if such an element exists).
+     * Returns <tt>true</tt> if this deque contained the specified element
+     * (or equivalently, if this deque changed as a result of the call).
+     *
+     * @param o element to be removed from this deque, if present
+     * @return <tt>true</tt> if an element was removed as a result of this call
+     * @throws ClassCastException   if the class of the specified element
+     *                              is incompatible with this deque
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException if the specified element is null and this
+     *                              deque does not permit null elements
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     */
+    @Override
+    public boolean removeFirstOccurrence(Object o) {
+        return remove(o);
+    }
+
+    /**
+     * Removes the last occurrence of the specified element from this deque.
+     * If the deque does not contain the element, it is unchanged.
+     * More formally, removes the last element <tt>e</tt> such that
+     * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>
+     * (if such an element exists).
+     * Returns <tt>true</tt> if this deque contained the specified element
+     * (or equivalently, if this deque changed as a result of the call).
+     *
+     * @param o element to be removed from this deque, if present
+     * @return <tt>true</tt> if an element was removed as a result of this call
+     * @throws ClassCastException   if the class of the specified element
+     *                              is incompatible with this deque
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     * @throws NullPointerException if the specified element is null and this
+     *                              deque does not permit null elements
+     *                              (<a href="Collection.html#optional-restrictions">optional</a>)
+     */
+    @Override
+    public boolean removeLastOccurrence(Object o) {
+        int lastIndex = lastIndexOf(o);
+        if (lastIndex == -1)
+            return false;
+        remove(lastIndex);
+        return true;
+    }
+
+    /**
      * Appends the specified element to the end of this list (optional
      * operation).
      * <p/>
@@ -198,6 +481,135 @@ public class LinkedListImpl<E> implements List<E> {
         tailNode.preNode = tailNode.preNode.nextNode = new Node(tailNode.preNode,tailNode,e);
         size++;
         return true;
+    }
+
+    /**
+     * Inserts the specified element into this queue if it is possible to do
+     * so immediately without violating capacity restrictions.
+     * When using a capacity-restricted queue, this method is generally
+     * preferable to {@link #add}, which can fail to insert an element only
+     * by throwing an exception.
+     *
+     * @param e the element to add
+     * @return <tt>true</tt> if the element was added to this queue, else
+     * <tt>false</tt>
+     * @throws ClassCastException       if the class of the specified element
+     *                                  prevents it from being added to this queue
+     * @throws NullPointerException     if the specified element is null and
+     *                                  this queue does not permit null elements
+     * @throws IllegalArgumentException if some property of this element
+     *                                  prevents it from being added to this queue
+     */
+    @Override
+    public boolean offer(E e) {
+        return add(e);
+    }
+
+    /**
+     * Retrieves and removes the head of this queue.  This method differs
+     * from {@link #poll poll} only in that it throws an exception if this
+     * queue is empty.
+     *
+     * @return the head of this queue
+     * @throws NoSuchElementException if this queue is empty
+     */
+    @Override
+    public E remove() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        Node<E> currentNode = headNode.nextNode;
+        if(currentNode != null && currentNode.nextNode != null){
+            currentNode.preNode.nextNode = currentNode.nextNode;
+            currentNode.nextNode.preNode = currentNode.preNode;
+            size--;
+        }
+        return currentNode.data;
+    }
+
+    /**
+     * Retrieves and removes the head of this queue,
+     * or returns <tt>null</tt> if this queue is empty.
+     *
+     * @return the head of this queue, or <tt>null</tt> if this queue is empty
+     */
+    @Override
+    public E poll() {
+        if (isEmpty())
+            return null;
+        Node<E> currentNode = headNode.nextNode;
+        if (currentNode != null && currentNode.nextNode != null){
+            currentNode.preNode.nextNode = currentNode.nextNode;
+            currentNode.nextNode.preNode = currentNode.preNode;
+            size--;
+        }
+        return currentNode.data;
+    }
+
+    /**
+     * Retrieves, but does not remove, the head of this queue.  This method
+     * differs from {@link #peek peek} only in that it throws an exception
+     * if this queue is empty.
+     *
+     * @return the head of this queue
+     * @throws NoSuchElementException if this queue is empty
+     */
+    @Override
+    public E element() {
+        if (isEmpty())
+            throw new NoSuchElementException();
+        return headNode.nextNode.data;
+    }
+
+    /**
+     * Retrieves, but does not remove, the head of this queue,
+     * or returns <tt>null</tt> if this queue is empty.
+     *
+     * @return the head of this queue, or <tt>null</tt> if this queue is empty
+     */
+    @Override
+    public E peek() {
+        if (isEmpty())
+            return null;
+        return headNode.nextNode.data;
+    }
+
+    /**
+     * Pushes an element onto the stack represented by this deque (in other
+     * words, at the head of this deque) if it is possible to do so
+     * immediately without violating capacity restrictions, returning
+     * <tt>true</tt> upon success and throwing an
+     * <tt>IllegalStateException</tt> if no space is currently available.
+     * <p/>
+     * <p>This method is equivalent to {@link #addFirst}.
+     *
+     * @param e the element to push
+     * @throws IllegalStateException    if the element cannot be added at this
+     *                                  time due to capacity restrictions
+     * @throws ClassCastException       if the class of the specified element
+     *                                  prevents it from being added to this deque
+     * @throws NullPointerException     if the specified element is null and this
+     *                                  deque does not permit null elements
+     * @throws IllegalArgumentException if some property of the specified
+     *                                  element prevents it from being added to this deque
+     */
+    @Override
+    public void push(E e) {
+        addFirst(e);
+    }
+
+    /**
+     * Pops an element from the stack represented by this deque.  In other
+     * words, removes and returns the first element of this deque.
+     * <p/>
+     * <p>This method is equivalent to {@link #removeFirst()}.
+     *
+     * @return the element at the front of this deque (which is the top
+     * of the stack represented by this deque)
+     * @throws NoSuchElementException if this deque is empty
+     */
+    @Override
+    public E pop() {
+        return removeFirst();
     }
 
     /**
@@ -265,7 +677,24 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public boolean containsAll(Collection<?> c) {
-        return false;
+        if (c == null || c.size() < 1)
+            return true;
+        if (c instanceof Set){
+            for (E e : this){
+                if (!c.contains(e))
+                    return false;
+            }
+        }else {
+            Set hashSet = new HashSet<>();
+            for (Object o : c){
+                hashSet.add(o);
+            }
+            for (E e : this){
+                if (!hashSet.contains(e))
+                    return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -332,7 +761,7 @@ public class LinkedListImpl<E> implements List<E> {
         int startIndex = 0;
         while (iterator.hasNext()){
             E e = iterator.next();
-            if (startIndex++ < size)
+            if (startIndex++ >= index)
                 add(e);
         }
         return true;
@@ -397,7 +826,32 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public boolean retainAll(Collection<?> c) {
-        return false;
+        if (c == null || c.size() < 1) {
+            clear();
+            return true;
+        }
+        if (c instanceof Set){
+            Iterator<E> iterator = this.iterator();
+            while (iterator.hasNext()){
+                E element = iterator.next();
+                if(!c.contains(element)){
+                    iterator.remove();
+                }
+            }
+        }else {
+            Set hashSet = new HashSet<>();
+            for (Object o : c){
+                hashSet.add(o);
+            }
+            Iterator<E> iterator = this.iterator();
+            while (iterator.hasNext()){
+                E element = iterator.next();
+                if(!c.contains(element)){
+                    iterator.remove();
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -424,6 +878,15 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public E get(int index) {
+        if (index < 0 || index > size - 1)
+            throw new IndexOutOfBoundsException();
+        Node<E> currentNode = headNode.nextNode;
+        int targetIndex = 0;
+        while(currentNode != null ){
+            if (targetIndex++ == index)
+                return currentNode.data;
+            currentNode = currentNode.nextNode;
+        }
         return null;
     }
 
@@ -447,7 +910,19 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public E set(int index, E element) {
-        return null;
+        if (index < 0 || index > size - 1)
+            throw new IndexOutOfBoundsException();
+        Node<E> currentNode = headNode.nextNode;
+        int targetIndex = 0;
+        E oldElement = null;
+        while(currentNode != null ){
+            if (targetIndex++ == index) {
+                oldElement = currentNode.data;
+                currentNode.data = element;
+            }
+            currentNode = currentNode.nextNode;
+        }
+        return oldElement;
     }
 
     /**
@@ -471,7 +946,18 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public void add(int index, E element) {
-
+        if (index < 0 || index > size - 1)
+            throw new IndexOutOfBoundsException();
+        Node<E> currentNode = headNode.nextNode;
+        int targetIndex = 0;
+        while(currentNode != null ){
+            if (targetIndex++ == index) {
+                currentNode.nextNode = currentNode.nextNode.preNode = new Node(currentNode,currentNode.nextNode,element);
+                size++;
+                break;
+            }
+            currentNode = currentNode.nextNode;
+        }
     }
 
     /**
@@ -489,7 +975,20 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public E remove(int index) {
-        return null;
+        if (index < 0 || index >= size )
+            throw new IndexOutOfBoundsException();
+        Node<E> currentNode = headNode.nextNode;
+        int targetIndex = 0;
+        while(currentNode != null && currentNode.nextNode != null){
+            if (targetIndex++ == index) {
+                currentNode.nextNode.preNode = currentNode.preNode;
+                currentNode.preNode.nextNode = currentNode.nextNode;
+                size--;
+                break;
+            }
+            currentNode = currentNode.nextNode;
+        }
+        return currentNode.data;
     }
 
     /**
@@ -511,7 +1010,19 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public int indexOf(Object o) {
-        return 0;
+        Node<E> currentNode = headNode.nextNode;
+        int currentIndex = -1;
+        while(currentNode != null && ++currentIndex < size ){
+            currentNode = currentNode.nextNode;
+            if ( o == null){
+                if (currentNode.data == null)
+                    return currentIndex;
+            }else {
+                if (o.equals(currentNode.data))
+                    return currentIndex;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -533,7 +1044,19 @@ public class LinkedListImpl<E> implements List<E> {
      */
     @Override
     public int lastIndexOf(Object o) {
-        return 0;
+        Node<E> currentNode = headNode.preNode;
+        int currentIndex = size;
+        while(currentNode != null && --currentIndex > -1 ){
+            currentNode = currentNode.preNode;
+            if ( o == null){
+                if (currentNode.data == null)
+                    return currentIndex;
+            }else {
+                if (o.equals(currentNode.data))
+                    return currentIndex;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -609,8 +1132,6 @@ public class LinkedListImpl<E> implements List<E> {
 
     private class LinkedListIterator<E> implements ListIterator<E>{
 
-        private LinkedListImpl thisList = LinkedListImpl.this;
-
         private int currentSize;
 
         private int currentIndex;
@@ -618,7 +1139,7 @@ public class LinkedListImpl<E> implements List<E> {
         private Node<E> currentNode;
 
         public LinkedListIterator(){
-            currentNode = headNode.nextNode;
+            currentNode = (Node<E>) headNode.nextNode;
             currentSize = size;
         }
 
@@ -818,9 +1339,9 @@ public class LinkedListImpl<E> implements List<E> {
 
     private static class Node<E>{
 
-        public Node preNode;
+        public Node<E> preNode;
 
-        public Node nextNode;
+        public Node<E> nextNode;
 
         public E data;
 
