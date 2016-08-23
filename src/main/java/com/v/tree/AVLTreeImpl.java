@@ -204,6 +204,9 @@ public class AVLTreeImpl<K extends Comparable,V> {
         return node == null ? -1 : node.height;
     }
 
+    /*
+    深度优先
+     */
     private void each(TreeNode currentNode,int eachType,ProcessNode each){
         if (currentNode == null)
             return;
@@ -249,6 +252,10 @@ public class AVLTreeImpl<K extends Comparable,V> {
         return getHeight(root);
     }
 
+    /*
+      广度优先遍历
+      @param each
+     */
     public void BFSForeach(ProcessNode each){
         if(null == root)
             return;
