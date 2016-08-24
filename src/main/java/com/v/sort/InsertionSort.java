@@ -2,6 +2,8 @@ package com.v.sort;
 
 import org.testng.annotations.Test;
 
+import java.util.Random;
+
 /**
  * Created by v on 2016/8/24.
  * 插入排序
