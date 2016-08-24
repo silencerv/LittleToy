@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 
 /**
  * Created by v on 2016/8/21.
- * 最小堆
+ * 数组实现最小堆
  */
 public class BinaryHeap<E extends Comparable> {
 
@@ -28,11 +28,12 @@ public class BinaryHeap<E extends Comparable> {
         heap = (E[]) new Comparable[this.capacity];
     }
 
+    //检查扩容
     private void checkSize(){
         if (size >= capacity){
             capacity = capacity * 2;
             E [] newHeap = (E[]) new Comparable[capacity];
-            System.arraycopy(heap,0,newHeap,0,size + 1);
+            System.arraycopy(heap,0,newHeap,0,size);
             heap = newHeap;
         }
     }
