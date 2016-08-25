@@ -15,8 +15,6 @@ public class QuickSort {
     public static void quickSort(Comparable [] arr,int startIndex,int endIndex){
         if (startIndex >= endIndex)
             return;
-      /*  if (startIndex < 0 || startIndex > endIndex || endIndex >= arr.length)
-            throw new IndexOutOfBoundsException();*/
         int left = startIndex + 1;
         int right = endIndex;
 
