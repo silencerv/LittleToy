@@ -12,7 +12,7 @@ public class PerfectShuffle {
         int half = arr.length >> 1;
         int count = 1;
         int startIndex = half;
-        //奇数变偶数变
+
         while(startIndex < arr.length){
             int current = startIndex;
             int gap = half - count++;
