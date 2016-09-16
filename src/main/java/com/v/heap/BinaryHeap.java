@@ -30,6 +30,8 @@ public class BinaryHeap<E extends Comparable> {
 
     //检查扩容
     private void checkSize(){
+        if (heap == null)
+            heap = (E[]) new Comparable[this.capacity];
         if (size >= capacity){
             capacity = capacity * 2;
             E [] newHeap = (E[]) new Comparable[capacity];
@@ -87,5 +89,7 @@ public class BinaryHeap<E extends Comparable> {
         }
         return minElement;
     }
+
+    public void clear(){heap = null;}
 
 }
