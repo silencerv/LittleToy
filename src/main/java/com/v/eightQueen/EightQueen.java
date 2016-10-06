@@ -119,7 +119,6 @@ public class EightQueen {
         if (queen == 0) {
             //打印棋盘
             print();
-//            System.exit(0);
             System.out.printf("成功数量%2d\n",++success);
             return;
         }
