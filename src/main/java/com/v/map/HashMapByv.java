@@ -99,10 +99,36 @@ public class HashMapByv<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
     private final Node<K,V> [] resize(){
         int oldCap = capacity;
+        int oldThr = threshold;
+        int exSize = size;
+        int newCap;
+        int newThr;
         Node<K,V> [] newTable = null;
         //如果是空表则创建
         if (table == null || table.length == 0 ){
             newTable = new Node[capacity];
+            table = newTable;
+        }else {//否则扩容
+            newCap = oldCap << 1;
+            newThr = oldThr << 1;
+            newTable = new Node[newCap];
+            for (int i = 0,j = 0 ; i < table.length && j < exSize; i++,j++){
+                Node<K,V> e = table[i];
+                if (e == null)
+                    continue;
+                else {
+                    int hash = e.hash;
+                    Node<K,V> insertPosition = newTable[hash & (newCap - 1)];
+                    if (insertPosition == null){
+                        newTable[hash & (newCap - 1)] = e;
+                    }else {
+                        for (; insertPosition.next != null ; insertPosition = insertPosition.next);
+                        insertPosition.next = e;
+                    }
+                }
+            }
+            capacity = newCap;
+            threshold = newThr;
             table = newTable;
         }
         return newTable;
@@ -115,13 +141,14 @@ public class HashMapByv<K,V> extends AbstractMap<K,V> implements Map<K,V> {
 
     @Override
     public V put(K key, V value) {
-        return putVal(hash(key),key,value);
+        return putVal(hash(key),key,value,false);
     }
 
-    private V putVal(int hash,K key,V value){
+    private V putVal(int hash,K key,V value,boolean absent){
         //如果hash table 为空或者需要扩容就resize
         Node<K,V> e = new Node<>(hash,key,value,null);
         Node<K,V> oldElement;
+        V oldValue = null;
         if (table == null || (size + 1) > threshold)
             resize();
         //首先判断是否有hash冲突
@@ -129,17 +156,45 @@ public class HashMapByv<K,V> extends AbstractMap<K,V> implements Map<K,V> {
         //不存在hash冲突 直接放入 hash table 中
         if (oldElement == null)
             table[(table.length - 1 ) & hash] = e;
-        else if (oldElement.hash == hash){//有hash冲突或者是覆盖
-            //覆盖
-            if ((oldElement.key == null && key == null) || oldElement.key.equals(key)){
+        else {//有hash冲突或者是覆盖
+            if ( key == null && oldElement.key == null)
                 table[(table.length - 1 ) & hash] = e;
-            }else {//hash冲突  放入链表
-                oldElement.next = e;
+            else {
+                Node<K,V> preNode = oldElement;
+                boolean isRep = false;
+                for (; oldElement.next != null ; preNode = oldElement , oldElement = oldElement.next) {
+                    if (oldElement.key.equals(key)){
+                        if (absent){
+                            oldValue = value;
+                            if (value == null){
+                                if (oldElement.value == null);
+                                else {
+                                    oldValue = oldElement.value;
+                                    oldElement.value = value;
+                                }
+                            }else {
+                                if (value.equals(oldElement));
+                                else {
+                                    oldValue = oldElement.value;
+                                    oldElement.value = value;
+                                }
+                            }
+                        }else {
+                            preNode.next = e;
+                            e.next = oldElement.next;
+                        }
+                        isRep = true;
+                        break;
+                    }
+                }
+                if (!isRep){
+                    oldElement.next = e;
+                }
             }
         }
         size++;
         modCount++;
-        return oldElement == null ? null : oldElement.value;
+        return absent ? oldValue : (oldElement == null ? null : oldElement.value);
     }
 
     @Override
@@ -192,7 +247,8 @@ public class HashMapByv<K,V> extends AbstractMap<K,V> implements Map<K,V> {
      */
     @Override
     public V getOrDefault(Object key, V defaultValue) {
-        return null;
+        Node<K,V> e;
+        return (e = getNode(hash(key),key)) == null ? defaultValue : e.value;
     }
 
     /**
@@ -308,7 +364,7 @@ public class HashMapByv<K,V> extends AbstractMap<K,V> implements Map<K,V> {
      */
     @Override
     public V putIfAbsent(K key, V value) {
-        return null;
+        return putVal(hash(key),key,value,true);
     }
 
     /**
@@ -346,6 +402,11 @@ public class HashMapByv<K,V> extends AbstractMap<K,V> implements Map<K,V> {
     @Override
     public boolean remove(Object key, Object value) {
         return false;
+    }
+
+    @Override
+    public V remove(Object key) {
+        return null;
     }
 
     /**
