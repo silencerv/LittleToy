@@ -28,17 +28,18 @@ public class HeapSort {
 
     @Test
     public void testSort() {
-        Comparable[] arr = new Comparable[100];
+        Comparable[] arr = new Comparable[1000000];
         Random random = new Random();
         for (int i = 0; i < arr.length; i++) {
-            arr[i] = random.nextInt(1000);
+            arr[i] = random.nextInt(1000000000);
         }
         long startTime = System.currentTimeMillis();
         heapSort(arr, 0, arr.length);
         long endTime = System.currentTimeMillis();
         System.out.println("耗时" + (endTime - startTime) + "ms");
-        for (Comparable comparable : arr){
+       /* for (Comparable comparable : arr){
             System.out.println(comparable);
-        }
+        }*/
+        assert (endTime - startTime) < 1000;
     }
 }

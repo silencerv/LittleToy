@@ -74,7 +74,7 @@ public class MergeSort {
         Comparable[] resultArr = new Comparable[1000000];
         Random random = new Random();
         for (int i = 0; i < arr.length; i++) {
-            arr[i] = random.nextInt(100000000);
+            arr[i] = random.nextInt(1000000000);
         }
         long startTime = System.currentTimeMillis();
         mergeSort(arr, 0, arr.length,resultArr);
@@ -83,5 +83,6 @@ public class MergeSort {
       /*  for (Comparable comparable : arr){
             System.out.println(comparable);
         }*/
+        assert (endTime - startTime) < 500;
     }
 }

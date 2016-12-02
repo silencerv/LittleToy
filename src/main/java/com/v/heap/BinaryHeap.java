@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 
 /**
  * Created by v on 2016/8/21.
- * 数组实现最小堆
+ * 数组实现二叉最小堆
  */
 public class BinaryHeap<E extends Comparable> {
 

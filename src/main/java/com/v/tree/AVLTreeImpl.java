@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * Created by v on 2016/8/20.
- * 不计数不允许出现重复值
+ * 不计数不允许出现重复值，不允许 key 空
  */
 public class AVLTreeImpl<K extends Comparable,V> {
 
