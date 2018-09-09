@@ -8,8 +8,12 @@ public class FindUnionSet {
 
     private int [] s;
 
-    public FindUnionSet(int[] s) {
-        this.s = s;
+    public FindUnionSet(int cap) {
+        int [] arr = new int[cap];
+        for (int i = 0 ; i < cap; i++){
+            arr[i] = i;
+        }
+        s = arr;
     }
 
     /**

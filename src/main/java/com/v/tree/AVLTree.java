@@ -3,18 +3,14 @@ package com.v.tree;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Stack;
+import java.util.function.Consumer;
 
 /**
  * Created by v on 2016/8/20.
  * 不计数不允许出现重复值，不允许 key 空
  */
-public class AVLTreeImpl<K extends Comparable,V> {
-
-    public static final int PREORDER = -1;
-
-    public static final int INORDER = 0;
-
-    public static final int POSTORDER = 1;
+public class AVLTree<K extends Comparable,V> {
 
     private TreeNode<K,V> root;
 
@@ -117,7 +113,7 @@ public class AVLTreeImpl<K extends Comparable,V> {
                     TreeNode<K,V> leftNode = currentNode.left;
                     currentNode = getMinKey(currentNode.right);
                     currentNode.left = leftNode;
-                    currentNode.right = remove(currentNode.getKey(),currentNode.right);
+                    currentNode.right = remove(currentNode.key,currentNode.right);
                 }
             }else if (currentNode.left != null){
                 return currentNode.left;
@@ -204,67 +200,22 @@ public class AVLTreeImpl<K extends Comparable,V> {
         return node == null ? -1 : node.height;
     }
 
-    /*
-    深度优先
-     */
-    private void each(TreeNode currentNode,int eachType,ProcessNode each){
-        if (currentNode == null)
-            return;
-        else {
-            if (eachType == PREORDER )
-                each.each(currentNode);
-            if (currentNode.left != null)
-                each(currentNode.left,eachType,each);
-            if (eachType == INORDER )
-                each.each(currentNode);
-            if (currentNode.right != null)
-                midForeach(currentNode.right,each);
-            if (eachType == INORDER )
-                each.each(currentNode);
-        }
-    }
-
-    public void preForeach(TreeNode currentNode,ProcessNode each){
-        each(currentNode,PREORDER,each);
-    }
-
-    private void midForeach(TreeNode currentNode,ProcessNode each) {
-        each(currentNode,INORDER,each);
-    }
-
-    public void postForeach(TreeNode currentNode,ProcessNode each){
-        each(currentNode,POSTORDER,each);
-    }
-
-    public void preForeach(ProcessNode each) {
-        preForeach(root,each);
-    }
-
-    public void midForeach(ProcessNode each) {
-        midForeach(root,each);
-    }
-
-    public void postForeach(ProcessNode each) {
-        postForeach(root,each);
-    }
-
     public int getTreeHeight(){
         return getHeight(root);
     }
 
     /*
       广度优先遍历
-      @param each
+      @param consumer
      */
-    public void BFSForeach(ProcessNode each){
+    public void BFSForeach(Consumer<TreeNode<K,V>> consumer){
         if(null == root)
             return;
         Deque<TreeNode> que = new LinkedList<>();
-        TreeNode currentNode = root;
         que.addLast(root);
-        while(que.size() > 0){
-            currentNode = que.poll();
-            each.each(currentNode);
+        while(!que.isEmpty()){
+            TreeNode currentNode = que.poll();
+            consumer.accept(currentNode);
             if (currentNode.left != null)
                 que.addLast(currentNode.left);
             if (currentNode.right != null)
@@ -273,88 +224,24 @@ public class AVLTreeImpl<K extends Comparable,V> {
 
     }
 
-    private static class TreeNode<K extends Comparable,V> implements Map.Entry<K,V>{
 
-        K key;
-
-        V value;
-
-        int height;
-
-        TreeNode<K,V> left;
-
-        TreeNode<K,V> right;
-
-        TreeNode<K,V> parent;
-
-        public TreeNode(K key,V value, int height, TreeNode<K,V> left, TreeNode<K,V> right, TreeNode<K,V> parent) {
-            this.key = key;
-            this.value = value;
-            this.height = height;
-            this.left = left;
-            this.right = right;
-            this.parent = parent;
+    /**
+     * 深度优先
+     * @param consumer
+     */
+    public void DfsForeach(Consumer<TreeNode<K,V>> consumer){
+        if(null == root)
+            return;
+        LinkedList<TreeNode> stack = new LinkedList<>();
+        stack.push(root);
+        while(!stack.isEmpty()){
+            TreeNode currentNode = stack.poll();
+            consumer.accept(currentNode);
+            if (currentNode.right != null)
+                stack.push(currentNode.right);
+            if (currentNode.left != null)
+                stack.push(currentNode.left);
         }
 
-        /**
-         * Returns the key corresponding to this entry.
-         *
-         * @return the key corresponding to this entry
-         * @throws IllegalStateException implementations may, but are not
-         *                               required to, throw this exception if the entry has been
-         *                               removed from the backing map.
-         */
-        @Override
-        public K getKey() {
-            return key;
-        }
-
-        /**
-         * Returns the value corresponding to this entry.  If the mapping
-         * has been removed from the backing map (by the iterator's
-         * <tt>remove</tt> operation), the results of this call are undefined.
-         *
-         * @return the value corresponding to this entry
-         * @throws IllegalStateException implementations may, but are not
-         *                               required to, throw this exception if the entry has been
-         *                               removed from the backing map.
-         */
-        @Override
-        public V getValue() {
-            return value;
-        }
-
-        /**
-         * Replaces the value corresponding to this entry with the specified
-         * value (optional operation).  (Writes through to the map.)  The
-         * behavior of this call is undefined if the mapping has already been
-         * removed from the map (by the iterator's <tt>remove</tt> operation).
-         *
-         * @param value new value to be stored in this entry
-         * @return old value corresponding to the entry
-         * @throws UnsupportedOperationException if the <tt>put</tt> operation
-         *                                       is not supported by the backing map
-         * @throws ClassCastException            if the class of the specified value
-         *                                       prevents it from being stored in the backing map
-         * @throws NullPointerException          if the backing map does not permit
-         *                                       null values, and the specified value is null
-         * @throws IllegalArgumentException      if some property of this value
-         *                                       prevents it from being stored in the backing map
-         * @throws IllegalStateException         implementations may, but are not
-         *                                       required to, throw this exception if the entry has been
-         *                                       removed from the backing map.
-         */
-        @Override
-        public V setValue(V value) {
-            V oldValue = this.value;
-            this.value = value;
-            return oldValue;
-        }
-    }
-
-    @FunctionalInterface
-    public  interface ProcessNode<K extends Comparable,V>{
-
-        void each(Map.Entry<K,V> node);
     }
 }
